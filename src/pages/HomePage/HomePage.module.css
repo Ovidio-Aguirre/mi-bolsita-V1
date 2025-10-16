@@ -1,0 +1,153 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+}
+
+.header h2 {
+  font-size: 1.2rem;
+}
+
+.logoutButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: #dc3545;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.balanceContainer {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+
+.balanceItem {
+  display: inline-block;
+  margin: 0 1rem;
+}
+
+.balanceItem h3 {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.balanceItem p {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.transactionListContainer {
+  text-align: center;
+  color: #888;
+}
+
+.addButtonsContainer {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f0f2f5;
+}
+
+.actionButton {
+  flex-grow: 1;
+  padding: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.income {
+  background-color: #28a745;
+}
+
+.expense {
+  background-color: #ffc107;
+}
+
+.noTransactions {
+  text-align: center;
+  color: #888;
+  margin-top: 2rem;
+}
+
+.transactionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  border-left-width: 5px;
+  border-left-style: solid;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+}
+
+.transactionItem span:first-child {
+  font-weight: 500;
+}
+
+.transactionItem span:last-child {
+  font-weight: bold;
+}
+
+.incomeItem {
+  border-left-color: #28a745;
+}
+
+.expenseItem {
+  border-left-color: #dc3545;
+}
+.header { /* Modificar esta regla existente */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Añadir estas nuevas reglas */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.settingsLink {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}

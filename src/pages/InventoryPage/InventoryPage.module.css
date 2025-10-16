@@ -1,0 +1,55 @@
+.container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.formContainer {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.formGrid input {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.formGrid button {
+  padding: 0.8rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.tableContainer {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.productTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.productTable th, .productTable td {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
