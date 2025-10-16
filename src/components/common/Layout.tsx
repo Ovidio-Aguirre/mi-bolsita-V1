@@ -2,6 +2,8 @@
 import { useState, type ReactNode } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { signOutUser } from '../../services/authService';
+
+// Importaciones de MUI
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -16,12 +18,16 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider'; // Importar Divider
+
+// Importar todos los íconos que usaremos
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout'; // <-- 1. Importar el ícono de Salir
 
 interface LayoutProps { children: ReactNode; }
 
@@ -42,7 +48,10 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
-      <Typography variant="h6" sx={{ my: 2 }}>Mi Bolsita</Typography>
+      <Typography variant="h6" sx={{ my: 2 }}>
+        Mi Bolsita
+      </Typography>
+      <Divider /> {/* Separador visual */}
       <List>
         {navItems.map((item) => (
           <ListItem key={item.text} disablePadding>
@@ -52,6 +61,15 @@ export const Layout = ({ children }: LayoutProps) => {
             </ListItemButton>
           </ListItem>
         ))}
+        {/* --- 2. BOTÓN DE SALIR AÑADIDO AQUÍ --- */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={signOutUser}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Salir" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
@@ -81,7 +99,7 @@ export const Layout = ({ children }: LayoutProps) => {
         {drawer}
       </Drawer>
 
-      <Container component="main" sx={{ p: { xs: 1, sm: 3 }, width: '100%' }}> {/* Padding ajustado para móvil */}
+      <Container component="main" sx={{ p: { xs: 1, sm: 3 }, width: '100%' }}>
         <Toolbar /> 
         {children}
       </Container>
