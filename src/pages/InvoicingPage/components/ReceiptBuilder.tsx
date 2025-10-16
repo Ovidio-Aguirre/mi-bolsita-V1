@@ -1,5 +1,6 @@
 // src/pages/InvoicingPage/components/ReceiptBuilder.tsx
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
 import { useProducts } from '../../../hooks/useProducts';
 import { type Product, type UserProfile, addMultiItemSale, updateUserProfile } from '../../../services/firestoreService';
@@ -63,14 +64,38 @@ export const ReceiptBuilder = ({ profile, onClose }: ReceiptBuilderProps) => {
         return;
     }
 
-    setIsLoading(true);
-    const currentReceiptNumber = profile.receiptCounter || 0;
-    const newReceiptNumber = currentReceiptNumber + 1;
-    await addMultiItemSale(currentUser.uid, cart, '', paymentMethod, calculatedDiscount);
-    await updateUserProfile(currentUser.uid, { receiptCounter: newReceiptNumber });
-    generateReceiptPDF(cart, profile, newReceiptNumber, paymentMethod, calculatedDiscount, typeof cashTendered === 'number' ? cashTendered : undefined);
-    setIsLoading(false);
-    onClose();
+    // CORRECCIÓN: Se elimina 'async' de la función de la promesa
+    const promise = new Promise((resolve, reject) => {
+        try {
+            setIsLoading(true);
+            // Usamos una función auto-ejecutable async para poder usar await dentro
+            (async () => {
+                const currentReceiptNumber = profile.receiptCounter || 0;
+                const newReceiptNumber = currentReceiptNumber + 1;
+                
+                await addMultiItemSale(currentUser.uid, cart, '', paymentMethod, calculatedDiscount);
+                await updateUserProfile(currentUser.uid, { receiptCounter: newReceiptNumber });
+        
+                const doc = generateReceiptPDF(cart, profile, newReceiptNumber, paymentMethod, calculatedDiscount, typeof cashTendered === 'number' ? cashTendered : undefined);
+                
+                doc.save(`Recibo_No_${newReceiptNumber.toString().padStart(7, '0')}.pdf`);
+                
+                resolve('¡Comprobante generado!');
+                onClose();
+            })();
+        // CORRECCIÓN: Se elimina la variable 'error' que no se usa
+        } catch {
+            reject('Hubo un error al generar el comprobante.');
+        } finally {
+            setIsLoading(false);
+        }
+    });
+    
+    toast.promise(promise, {
+      loading: 'Generando y registrando...',
+      success: '¡Venta registrada y comprobante descargado!',
+      error: 'Error al procesar la venta.',
+    });
   };
 
   return (

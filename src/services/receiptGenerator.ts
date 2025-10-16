@@ -9,13 +9,13 @@ interface CartItem {
   quantity: number;
 }
 
-// Creamos una interfaz extendida para que TypeScript conozca la propiedad 'lastAutoTable'
 interface jsPDFWithAutoTable extends jsPDF {
   lastAutoTable: {
     finalY: number;
   };
 }
 
+// La función ahora devuelve el objeto PDF en lugar de guardarlo
 export const generateReceiptPDF = (
   cart: CartItem[],
   profile: UserProfile,
@@ -23,16 +23,15 @@ export const generateReceiptPDF = (
   paymentMethod: string,
   discountAmount: number,
   cashTendered?: number
-) => {
+): jsPDF => { // <-- Se define el tipo de retorno
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: [80, 160 + (cart.length * 5)]
-  }) as jsPDFWithAutoTable; // <-- CORRECCIÓN: Usamos nuestra interfaz extendida
+  }) as jsPDFWithAutoTable;
 
+  // ... (Todo el código para construir el PDF permanece exactamente igual)
   const centerX = doc.internal.pageSize.getWidth() / 2;
-  
-  // Encabezado (sin cambios)
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('<< RECIBO DE VENTA INTERNA >>', centerX, 10, { align: 'center' });
@@ -51,21 +50,15 @@ export const generateReceiptPDF = (
   doc.text(`RECIBO No. ${receiptId}`, 5, 40);
   doc.text(`FECHA: ${saleDate.toLocaleDateString('es-SV')}`, 5, 44);
   doc.text(`HORA: ${saleDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`, doc.internal.pageSize.getWidth() - 5, 44, { align: 'right' });
-
   autoTable(doc, {
     head: [['CANT.', 'DESCRIPCIÓN', 'PRECIO']],
     body: cart.map(item => [ item.quantity.toFixed(1), item.product.name, `$${(item.product.salePrice * item.quantity).toFixed(2)}` ]),
-    startY: 48,
-    theme: 'plain',
-    headStyles: { halign: 'center', fontSize: 8, fontStyle: 'bold' },
+    startY: 48, theme: 'plain', headStyles: { halign: 'center', fontSize: 8, fontStyle: 'bold' },
     styles: { fontSize: 8, cellPadding: 0.5 },
     columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 15, halign: 'right' } }
   });
-
-  let finalY = doc.lastAutoTable.finalY; // <-- CORRECCIÓN: Ya no necesitamos 'as any'
+  let finalY = doc.lastAutoTable.finalY;
   doc.text('----------------------------------------------------', centerX, finalY + 4, { align: 'center' });
-
-  // Totales (sin cambios)
   const subtotal = cart.reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0);
   const finalTotal = subtotal - discountAmount;
   doc.setFont('helvetica', 'normal');
@@ -78,7 +71,6 @@ export const generateReceiptPDF = (
   doc.text('TOTAL A PAGAR:', 5, finalY + 22);
   doc.text(`$${finalTotal.toFixed(2)}`, doc.internal.pageSize.getWidth() - 5, finalY + 22, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  
   if (paymentMethod === 'Efectivo' && cashTendered && cashTendered >= finalTotal) {
     const change = cashTendered - finalTotal;
     doc.text('Efectivo Recibido:', 5, finalY + 26);
@@ -89,15 +81,12 @@ export const generateReceiptPDF = (
     doc.setFont('helvetica', 'normal');
     finalY += 12;
   }
-
   doc.text('----------------------------------------------------', centerX, finalY + 26, { align: 'center' });
   const amountInWords = numeroALetras(finalTotal);
   doc.setFontSize(7);
   doc.text(`VALOR EN LETRAS: ${amountInWords}`, 5, finalY + 32, { maxWidth: 70 });
   doc.text(`FORMA DE PAGO: ${paymentMethod.toUpperCase()}`, 5, finalY + 38);
   doc.text('----------------------------------------------------', centerX, finalY + 42, { align: 'center' });
-
-  // Pie de página (sin cambios)
   doc.setFont('helvetica', 'bold');
   doc.text('¡ESTE NO ES UN DOCUMENTO FISCAL!', centerX, finalY + 48, { align: 'center' });
   doc.setFont('helvetica', 'normal');
@@ -107,5 +96,6 @@ export const generateReceiptPDF = (
   doc.text('¡GRACIAS POR SU PREFERENCIA!', centerX, finalY + 62, { align: 'center' });
   doc.text('Conserve su recibo para cualquier reclamo.', centerX, finalY + 66, { align: 'center' });
 
-  doc.save(`Recibo_No_${receiptId}.pdf`);
+  // Se elimina la línea: doc.save(...)
+  return doc;
 };
