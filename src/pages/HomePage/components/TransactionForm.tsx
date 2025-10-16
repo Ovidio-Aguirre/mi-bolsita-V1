@@ -21,7 +21,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 
-const formStyles = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: '400px' } as const;
+const formStyles = { display: 'flex', flexDirection: 'column', gap: 2 } as const;
 
 interface CartItem { product: Product; quantity: number; }
 interface TransactionFormProps {
@@ -50,6 +50,7 @@ export const TransactionForm = ({ transactionType, onClose }: TransactionFormPro
   const availableCategories = categories.filter(c => c.type === transactionType);
 
   useEffect(() => {
+    // Resetear el carrito si se cambia de tipo de transacción (aunque el modal se recrea)
     setCart([]);
     setIsSale(false);
   }, [transactionType]);
@@ -89,7 +90,6 @@ export const TransactionForm = ({ transactionType, onClose }: TransactionFormPro
         setIsLoading(false);
         return;
       }
-      // CORRECCIÓN: Pasamos los argumentos que faltaban (con valores por defecto)
       await addMultiItemSale(currentUser.uid, cart, categoryId, 'Efectivo', 0);
     } else {
       const transactionData = {
@@ -149,4 +149,4 @@ export const TransactionForm = ({ transactionType, onClose }: TransactionFormPro
       </Button>
     </Box>
   );
-}
+};
