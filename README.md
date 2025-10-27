@@ -141,6 +141,3 @@ La aplicación está configurada para un despliegue sencillo usando **Vercel**:
 * [ ] Añadir **Análisis Proactivo** en el dashboard.
 
 ---
-
-¡Espero que este README te sea de gran utilidad!
-```
