@@ -1,75 +1,20 @@
 // src/services/firestoreService.ts
-import {
-  collection, addDoc, serverTimestamp, query,
-  onSnapshot, orderBy, type Timestamp, runTransaction, doc, deleteDoc, updateDoc, setDoc
+import { 
+  collection, addDoc, serverTimestamp, query, 
+  onSnapshot, orderBy, type Timestamp, runTransaction, doc, deleteDoc, updateDoc, setDoc, writeBatch 
 } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 // --- INTERFACES ---
-export interface Transaction {
-  id: string;
-  uid: string;
-  type: 'income' | 'expense';
-  amount: number;
-  concept: string;
-  createdAt: Timestamp;
-  categoryId?: string;
-  productId?: string;
-  quantity?: number;
-  items?: { productId: string; productName: string; quantity: number; salePrice: number; }[];
-  paymentMethod?: string;
-  discountAmount?: number;
-}
-
-export interface Category {
-  id: string;
-  uid: string;
-  name: string;
-  type: 'income' | 'expense';
-  createdAt: Timestamp;
-}
-
-export interface Product {
-  id: string;
-  uid: string;
-  name: string;
-  costPrice: number;
-  salePrice: number;
-  stock: number;
-  createdAt: Timestamp;
-  barcode?: string; // Campo para código de barras
-}
-
-export interface Debt {
-  id: string;
-  uid: string;
-  type: 'receivable' | 'payable';
-  personName: string;
-  initialAmount: number;
-  currentBalance: number;
-  concept: string;
-  createdAt: Timestamp;
-  dueDate?: Timestamp;
-}
-
-export interface Payment {
-  id: string;
-  amount: number;
-  createdAt: Timestamp;
-}
-
-export interface UserProfile {
-  businessName?: string;
-  businessAddress?: string;
-  businessPhone?: string;
-  receiptCounter?: number;
-}
+export interface Transaction { id: string; uid: string; type: 'income' | 'expense'; amount: number; concept: string; createdAt: Timestamp; categoryId?: string; productId?: string; quantity?: number; items?: { productId: string; productName: string; quantity: number; salePrice: number; }[]; paymentMethod?: string; discountAmount?: number; }
+export interface Category { id: string; uid: string; name: string; type: 'income' | 'expense'; createdAt: Timestamp; }
+export interface Product { id: string; uid: string; name: string; costPrice: number; salePrice: number; stock: number; createdAt: Timestamp; barcode?: string; }
+export interface Debt { id: string; uid: string; type: 'receivable' | 'payable'; personName: string; initialAmount: number; currentBalance: number; concept: string; createdAt: Timestamp; dueDate?: Timestamp; }
+export interface Payment { id: string; amount: number; createdAt: Timestamp; }
+export interface UserProfile { businessName?: string; businessAddress?: string; businessPhone?: string; receiptCounter?: number; }
 
 // --- FUNCIONES DE TRANSACCIONES ---
-interface SaleDetails {
-  productId: string;
-  quantity: number;
-}
+interface SaleDetails { productId: string; quantity: number; }
 export const addTransaction = async (uid: string, transactionData: Omit<Transaction, 'id' | 'createdAt' | 'uid'>, saleDetails?: SaleDetails) => {
   if (saleDetails && saleDetails.productId) {
     const productRef = doc(db, `users/${uid}/products`, saleDetails.productId);
@@ -102,7 +47,6 @@ export const addTransaction = async (uid: string, transactionData: Omit<Transact
     }
   }
 };
-
 export const addMultiItemSale = async (uid: string, items: { product: Product, quantity: number }[], categoryId: string, paymentMethod: string, discountAmount: number) => {
   const userTransactionsCollection = collection(db, `users/${uid}/transactions`);
   const subtotal = items.reduce((sum, item) => sum + (item.product.salePrice * item.quantity), 0);
@@ -120,20 +64,9 @@ export const addMultiItemSale = async (uid: string, items: { product: Product, q
       }
       const newTransactionRef = doc(userTransactionsCollection);
       transaction.set(newTransactionRef, {
-        uid,
-        type: 'income',
-        amount: finalTotal,
-        concept: `Venta de ${items.length} productos diferentes`,
-        categoryId,
-        createdAt: serverTimestamp(),
-        items: items.map(item => ({
-          productId: item.product.id,
-          productName: item.product.name,
-          quantity: item.quantity,
-          salePrice: item.product.salePrice
-        })),
-        paymentMethod,
-        discountAmount,
+        uid, type: 'income', amount: finalTotal, concept: `Venta de ${items.length} productos diferentes`, categoryId, createdAt: serverTimestamp(),
+        items: items.map(item => ({ productId: item.product.id, productName: item.product.name, quantity: item.quantity, salePrice: item.product.salePrice })),
+        paymentMethod, discountAmount,
       });
     });
     return { success: true };
@@ -143,7 +76,6 @@ export const addMultiItemSale = async (uid: string, items: { product: Product, q
     return { success: false, error };
   }
 };
-
 export const getTransactions = (uid: string, callback: (transactions: Transaction[]) => void) => {
   const userTransactionsCollection = collection(db, `users/${uid}/transactions`);
   const q = query(userTransactionsCollection, orderBy('createdAt', 'desc'));
@@ -200,9 +132,7 @@ export const addProduct = async (uid: string, productData: Omit<Product, 'id' | 
     const userProductsCollection = collection(db, `users/${uid}/products`);
     const docRef = await addDoc(userProductsCollection, { ...productData, uid, createdAt: serverTimestamp() });
     return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error("Error al añadir el producto: ", error); return { success: false, error };
-  }
+  } catch (error) { console.error("Error al añadir el producto: ", error); return { success: false, error }; }
 };
 export const getProducts = (uid: string, callback: (products: Product[]) => void) => {
   const userProductsCollection = collection(db, `users/${uid}/products`);
@@ -216,34 +146,32 @@ export const getProducts = (uid: string, callback: (products: Product[]) => void
 };
 export const updateProduct = async (uid: string, productId: string, productData: Partial<Omit<Product, 'id' | 'uid' | 'createdAt'>>) => {
   const productRef = doc(db, `users/${uid}/products`, productId);
-  try {
-    await updateDoc(productRef, productData);
-    return { success: true };
-  } catch (error) {
-    console.error("Error al actualizar el producto: ", error); return { success: false, error };
-  }
+  try { await updateDoc(productRef, productData); return { success: true }; }
+  catch (error) { console.error("Error al actualizar el producto: ", error); return { success: false, error }; }
 };
 export const deleteProduct = async (uid: string, productId: string) => {
   const productRef = doc(db, `users/${uid}/products`, productId);
   try { await deleteDoc(productRef); return { success: true }; }
   catch (error) { console.error("Error al eliminar el producto: ", error); return { success: false, error }; }
 };
+export const addMultipleProducts = async (uid: string, productsData: Omit<Product, 'id' | 'uid' | 'createdAt'>[]) => {
+  const batch = writeBatch(db);
+  const userProductsCollection = collection(db, `users/${uid}/products`);
+  productsData.forEach((productData) => {
+    const newProductRef = doc(userProductsCollection);
+    batch.set(newProductRef, { ...productData, uid, createdAt: serverTimestamp() });
+  });
+  try { await batch.commit(); return { success: true }; }
+  catch (error) { console.error("Error al añadir múltiples productos: ", error); return { success: false, error }; }
+};
 
 // --- FUNCIONES PARA DEUDAS ---
 export const addDebt = async (uid: string, debtData: Omit<Debt, 'id' | 'createdAt' | 'uid' | 'currentBalance' | 'dueDate'> & { dueDate?: Timestamp }) => {
     try {
         const userDebtsCollection = collection(db, `users/${uid}/debts`);
-        const docRef = await addDoc(userDebtsCollection, {
-            ...debtData,
-            uid,
-            currentBalance: debtData.initialAmount,
-            createdAt: serverTimestamp()
-        });
+        const docRef = await addDoc(userDebtsCollection, { ...debtData, uid, currentBalance: debtData.initialAmount, createdAt: serverTimestamp() });
         return { success: true, id: docRef.id };
-    } catch (error) {
-        console.error("Error al añadir la deuda: ", error);
-        return { success: false, error };
-    }
+    } catch (error) { console.error("Error al añadir la deuda: ", error); return { success: false, error }; }
 };
 export const getDebts = (uid: string, callback: (debts: Debt[]) => void) => {
   const userDebtsCollection = collection(db, `users/${uid}/debts`);
@@ -271,11 +199,7 @@ export const addPaymentToDebt = async (uid: string, debtId: string, paymentAmoun
       transaction.set(newPaymentRef, { amount: paymentAmount, createdAt: serverTimestamp() });
     });
     return { success: true };
-  } catch (error) {
-    console.error("Error al registrar el abono: ", error);
-    alert(error);
-    return { success: false, error };
-  }
+  } catch (error) { console.error("Error al registrar el abono: ", error); alert(error); return { success: false, error }; }
 };
 export const deleteDebt = async (uid: string, debtId: string) => {
   const debtRef = doc(db, `users/${uid}/debts`, debtId);
@@ -286,22 +210,14 @@ export const deleteDebt = async (uid: string, debtId: string) => {
 // --- FUNCIONES PARA PERFIL DE USUARIO ---
 export const updateUserProfile = async (uid: string, profileData: Partial<UserProfile>) => {
   const profileRef = doc(db, `users/${uid}`);
-  try {
-    await setDoc(profileRef, profileData, { merge: true });
-    return { success: true };
-  } catch (error) {
-    console.error("Error al actualizar el perfil: ", error);
-    return { success: false, error };
-  }
+  try { await setDoc(profileRef, profileData, { merge: true }); return { success: true }; }
+  catch (error) { console.error("Error al actualizar el perfil: ", error); return { success: false, error }; }
 };
 export const getUserProfile = (uid: string, callback: (profile: UserProfile | null) => void) => {
   const profileRef = doc(db, `users/${uid}`);
   const unsubscribe = onSnapshot(profileRef, (doc) => {
-    if (doc.exists()) {
-      callback(doc.data() as UserProfile);
-    } else {
-      callback(null);
-    }
+    if (doc.exists()) { callback(doc.data() as UserProfile); }
+    else { callback(null); }
   });
   return unsubscribe;
 };
