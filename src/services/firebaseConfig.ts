@@ -7,12 +7,12 @@ import { getStorage } from "firebase/storage";
 
 // Tu configuración personal de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBP--Oxg8ZGf-tpWDLspGXKB1F178SPtMI",
-  authDomain: "mi-bolsita.firebaseapp.com",
-  projectId: "mi-bolsita",
-  storageBucket: "mi-bolsita.firebasestorage.app",
-  messagingSenderId: "368435767199",
-  appId: "1:368435767199:web:511de2d0ca82bd662abfaa"
+  apiKey: "AIzaSyDUZUNjB1CItv4H4Il58H9tjmmAXRihqKs",
+  authDomain: "mi-bolsita-v2.firebaseapp.com",
+  projectId: "mi-bolsita-v2",
+  storageBucket: "mi-bolsita-v2.firebasestorage.app",
+  messagingSenderId: "619005768750",
+  appId: "1:619005768750:web:3df8f552f90a775d2b9bbf"
 };
 
 // Inicializar la aplicación de Firebase
